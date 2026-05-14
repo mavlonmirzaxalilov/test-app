@@ -1,0 +1,6 @@
+{
+  "name": "EduTest Platform",
+  "description": "A professional testing platform with real-time results, branch-based registration, and advanced quiz logic built with Appwrite.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["auth", "database", "realtime"]
+}
