@@ -76,11 +76,14 @@ export const appwriteService = {
 	},
 
 	// Quizzes
-	async getQuizzes() {
+	async getQuizzes(audience?: string) {
+		const queries = [Query.orderDesc('$createdAt')]
+		if (audience) queries.push(Query.equal('audience', audience))
+
 		const res = await databases.listDocuments<Quiz>(
 			databaseId!,
 			collections.quizzes!,
-			[Query.orderDesc('$createdAt')],
+			queries,
 		)
 		return res.documents
 	},

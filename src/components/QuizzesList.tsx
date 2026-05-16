@@ -24,11 +24,11 @@ export function QuizzesList({
 	const [category, setCategory] = useState('all')
 	const { user } = useAuth()
 	const [completedQuizIds, setCompletedQuizIds] = useState<string[]>([])
-
 	useEffect(() => {
 		async function fetch() {
 			try {
-				const data = await appwriteService.getQuizzes()
+				const audience = user?.ageCategory === 'junior' ? 'kichik' : 'katta'
+				const data = await appwriteService.getQuizzes(audience)
 				setQuizzes(data)
 
 				if (user) {

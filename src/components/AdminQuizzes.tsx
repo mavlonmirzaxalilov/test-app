@@ -184,6 +184,7 @@ function QuizFormModal({
 		subject: quiz?.subject || '',
 		category: quiz?.category || '',
 		imageUrl: quiz?.imageUrl || '',
+		audience: quiz?.audience || 'kichik',
 	})
 	const [saving, setSaving] = useState(false)
 
@@ -246,6 +247,24 @@ function QuizFormModal({
 								value={data.imageUrl}
 								onChange={e => setData({ ...data, imageUrl: e.target.value })}
 							/>
+						</div>
+						<div className='space-y-1'>
+							<label className='text-[10px] font-black uppercase text-gray-400 px-1'>
+								Auditoriya
+							</label>
+							<select
+								className='w-full p-4 border-2 border-black rounded-xl font-bold bg-gray-50 focus:bg-blue-50/30 transition-all focus:outline-none'
+								value={data.audience}
+								onChange={e =>
+									setData({
+										...data,
+										audience: e.target.value as 'kichik' | 'katta',
+									})
+								}
+							>
+								<option value='kichik'>Kichik</option>
+								<option value='katta'>Katta</option>
+							</select>
 						</div>
 					</div>
 
