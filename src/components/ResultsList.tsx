@@ -5,15 +5,15 @@ import { useAuth } from '../hooks/useAuth'
 import { motion } from 'motion/react'
 import {
 	Trophy,
-	Calendar,
 	CheckCircle,
 	XCircle,
 	ChevronDown,
-	ListCheck,
-	Loader2,
 	TrendingUp,
+	Loader2,
+	Trash2,
 } from 'lucide-react'
 import { cn } from '../lib/utils'
+import { databases, APPWRITE_CONFIG } from '../lib/appwrite'
 
 export function ResultsList() {
 	const { user } = useAuth()
@@ -47,6 +47,20 @@ export function ResultsList() {
 			return () => unsubscribe()
 		}
 	}, [user])
+
+	const deleteResult = async (id: string) => {
+		if (!confirm('Ushbu natijani o\'chirmoqchimisiz?')) return;
+		try {
+			await databases.deleteDocument(
+				APPWRITE_CONFIG.databaseId!,
+				APPWRITE_CONFIG.collections.results!,
+				id
+			);
+			setResults(prev => prev.filter(r => r.$id !== id));
+		} catch (err) {
+			console.error('Error deleting result:', err);
+		}
+	};
 
 	if (loading)
 		return (
@@ -121,8 +135,8 @@ export function ResultsList() {
 											res.score / res.totalQuestions >= 0.8
 												? 'bg-green-500 text-white'
 												: res.score / res.totalQuestions >= 0.5
-													? 'bg-orange-400 text-black'
-													: 'bg-red-500 text-white',
+												? 'bg-orange-400 text-black'
+												: 'bg-red-500 text-white',
 										)}
 									>
 										<span className='text-lg font-black leading-none'>
@@ -145,7 +159,7 @@ export function ResultsList() {
 									</div>
 								</div>
 
-								<div className='flex flex-wrap items-center gap-8'>
+								<div className='flex flex-wrap items-center gap-4'>
 									<div className='flex flex-col items-end'>
 										<span className='text-[8px] font-black uppercase text-gray-400'>
 											Sana
@@ -158,6 +172,20 @@ export function ResultsList() {
 											})}
 										</span>
 									</div>
+
+									{user?.role === 'admin' && (
+										<button
+											onClick={e => {
+												e.stopPropagation();
+												deleteResult(res.$id);
+											}}
+											className='p-2 border-2 border-red-200 text-red-400 rounded-md hover:bg-red-50 hover:border-red-400 hover:text-red-600 transition-all'
+											title="O'chirish"
+										>
+											<Trash2 className='w-4 h-4' />
+										</button>
+									)}
+
 									<ChevronDown
 										className={cn(
 											'w-5 h-5 transition-all',
