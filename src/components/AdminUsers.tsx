@@ -1,32 +1,64 @@
 import { useState, useEffect } from 'react';
-import { appwriteService } from '../services/appwriteService';
 import { UserProfile } from '../types';
-import { Loader2, User as UserIcon, MapPin, Calendar, Phone, Search } from 'lucide-react';
+import { Loader2, MapPin, Calendar, Search, Trash2 } from 'lucide-react';
 import { databases, APPWRITE_CONFIG } from '../lib/appwrite';
+import { cn } from '../lib/utils';
+import { Query } from 'appwrite';
 
 export function AdminUsers() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
-  useEffect(() => {
-    async function fetch() {
-      try {
-        const res = await databases.listDocuments<UserProfile>(
-          APPWRITE_CONFIG.databaseId!,
-          APPWRITE_CONFIG.collections.users!
-        );
-        setUsers(res.documents);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+  async function fetchUsers() {
+    try {
+      const res = await databases.listDocuments<UserProfile>(
+        APPWRITE_CONFIG.databaseId!,
+        APPWRITE_CONFIG.collections.users!
+      );
+      setUsers(res.documents);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    fetch();
+  }
+
+  useEffect(() => {
+    fetchUsers();
   }, []);
 
-  const filtered = users.filter(u => 
+  const deleteUser = async (id: string) => {
+    if (!confirm('Ushbu foydalanuvchini o\'chirmoqchimisiz?')) return;
+    try {
+      await databases.deleteDocument(
+        APPWRITE_CONFIG.databaseId!,
+        APPWRITE_CONFIG.collections.users!,
+        id
+      );
+      setUsers(prev => prev.filter(u => u.$id !== id));
+    } catch (err) {
+      console.error('Error deleting user:', err);
+    }
+  };
+
+  const updateRole = async (id: string, currentRole: string) => {
+    const newRole = currentRole === 'admin' ? 'student' : 'admin';
+    if (!confirm(`Rolni "${newRole}" ga o'zgartirmoqchimisiz?`)) return;
+    try {
+      await databases.updateDocument(
+        APPWRITE_CONFIG.databaseId!,
+        APPWRITE_CONFIG.collections.users!,
+        id,
+        { role: newRole }
+      );
+      setUsers(prev => prev.map(u => u.$id === id ? { ...u, role: newRole as 'student' | 'admin' } : u));
+    } catch (err) {
+      console.error('Error updating role:', err);
+    }
+  };
+
+  const filtered = users.filter(u =>
     `${u.name} ${u.surname}`.toLowerCase().includes(search.toLowerCase()) ||
     u.phone.includes(search) ||
     u.branch.toLowerCase().includes(search.toLowerCase())
@@ -43,8 +75,8 @@ export function AdminUsers() {
         </div>
         <div className="relative min-w-[320px]">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-30" />
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="Search by name, phone, branch..."
             className="w-full pl-12 pr-4 py-3 bg-white border-2 border-black rounded-xl font-bold text-xs uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:translate-x-[-1px] focus:translate-y-[-1px] focus:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
             value={search}
@@ -62,7 +94,8 @@ export function AdminUsers() {
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">To'liq ism</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Kontakt</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Sektor / Yosh</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Sana</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest border-r border-white/10">Sana</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-center">Amal</th>
               </tr>
             </thead>
             <tbody className="bg-white">
@@ -93,6 +126,28 @@ export function AdminUsers() {
                   <td className="px-6 py-4 font-bold text-[10px] text-gray-400 tabular-nums">
                     {new Date(u.$createdAt).toLocaleDateString()}
                   </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => updateRole(u.$id, u.role)}
+                        className={cn(
+                          "px-3 py-1.5 border-2 text-[9px] font-black uppercase tracking-tighter rounded-md transition-all hover:opacity-80",
+                          u.role === 'admin'
+                            ? "border-green-500 text-green-600 hover:bg-green-50"
+                            : "border-blue-600 text-blue-600 hover:bg-blue-50"
+                        )}
+                      >
+                        {u.role === 'admin' ? '→ Student' : '→ Admin'}
+                      </button>
+                      <button
+                        onClick={() => deleteUser(u.$id)}
+                        className="p-2 border-2 border-red-200 text-red-400 rounded-md hover:bg-red-50 hover:border-red-400 hover:text-red-600 transition-all"
+                        title="O'chirish"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -102,5 +157,3 @@ export function AdminUsers() {
     </div>
   );
 }
-
-import { cn } from '../lib/utils';
