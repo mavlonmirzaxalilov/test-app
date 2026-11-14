@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Davomat va Baholash</title>
+<style>
+:root{
+  --bg:#f4f6fa; --card:#fff; --text:#1d2433; --muted:#6b7385; --line:#e2e6ee;
+  --primary:#2f6fde; --primary-d:#2459b8; --green:#1f9d55; --green-bg:#e6f6ec;
+  --red:#d93636; --red-bg:#fde8e8; --yellow:#b7791f; --yellow-bg:#fdf3dc;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:15px}
+header{background:var(--primary);color:#fff;padding:14px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+header h1{margin:0;font-size:20px}
+.groupbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.groupbar select{padding:7px 10px;border-radius:8px;border:none;font-size:15px;min-width:160px}
+nav{display:flex;gap:4px;padding:0 20px;background:#fff;border-bottom:1px solid var(--line);overflow-x:auto}
+nav button{background:none;border:none;padding:14px 16px;font-size:15px;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap}
+nav button.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+main{padding:20px;max-width:1400px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+.card h2{margin:0 0 12px;font-size:17px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select,textarea{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--text)}
+input:focus,select:focus,textarea:focus{outline:2px solid #bcd2fa;border-color:var(--primary)}
+.btn{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--text)}
+.btn:hover{background:#f0f3f8}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.primary:hover{background:var(--primary-d)}
+.btn.danger{color:var(--red);border-color:#f3c4c4}
+.btn.danger:hover{background:var(--red-bg)}
+.btn.sm{padding:4px 9px;font-size:13px}
+.hidden{display:none!important}
+.muted{color:var(--muted)}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px;max-height:70vh}
+table{border-collapse:separate;border-spacing:0;width:100%;background:#fff}
+th,td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:8px;text-align:center;white-space:nowrap}
+thead th{position:sticky;top:0;background:#f7f9fc;z-index:2;font-weight:600;font-size:13px}
+th.name,td.name{text-align:left;position:sticky;left:0;background:inherit;z-index:1;min-width:190px}
+thead th.name{z-index:3;background:#f7f9fc}
+tbody tr{background:#fff}
+tbody tr.danger{background:var(--red-bg)}
+tbody tr.danger td.name{color:var(--red);font-weight:600}
+.lesson-head{font-size:12px;line-height:1.3;max-width:120px;white-space:normal}
+.lesson-head .topic{color:var(--muted);font-weight:400;display:block;overflow:hidden;text-overflow:ellipsis;max-height:2.6em}
+.cell{display:flex;flex-direction:column;gap:4px;align-items:center}
+.att{width:44px;height:28px;border-radius:6px;border:1px solid var(--line);cursor:pointer;font-weight:700;font-size:14px;background:#fff}
+.att.p{background:var(--green-bg);color:var(--green);border-color:#b5e3c6}
+.att.a{background:var(--red);color:#fff;border-color:var(--red)}
+.att.e{background:var(--yellow-bg);color:var(--yellow);border-color:#f1d9a0}
+.grade{width:66px;padding:3px;font-size:13px}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:13px;font-weight:600}
+.pill.red{background:var(--red);color:#fff}
+.pill.green{background:var(--green-bg);color:var(--green)}
+.pill.yellow{background:var(--yellow-bg);color:var(--yellow)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:10px 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:16px;height:16px;border-radius:4px;display:inline-block;border:1px solid var(--line)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat .v{font-size:26px;font-weight:700}
+.stat .l{color:var(--muted);font-size:13px}
+.stat.red .v{color:var(--red)}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 4px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.list li:last-child{border-bottom:none}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.topic-text{white-space:pre-wrap}
+.alert{background:var(--red-bg);color:var(--red);border:1px solid #f3c4c4;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-weight:600}
+dialog{border:none;border-radius:14px;padding:20px;max-width:460px;width:92%;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(0,0,0,.35)}
+dialog h3{margin-top:0}
+dialog label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+dialog input,dialog textarea,dialog select{width:100%}
+dialog .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+@media print{
+  header,nav,.noprint{display:none!important}
+  main{padding:0}
+  .tablewrap{max-height:none;overflow:visible}
+  .card{border:none}
+}
+@media (max-width:600px){main{padding:12px}header h1{font-size:17px}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📘 Davomat va Baholash</h1>
+  <div class="groupbar">
+    <label for="groupSelect">Guruh:</label>
+    <select id="groupSelect"></select>
+    <button class="btn sm" id="addGroupBtn">+ Guruh</button>
+    <button class="btn sm" id="editGroupBtn">✎</button>
+  </div>
+</header>
+
+<nav>
+  <button data-tab="journal" class="active">📋 Jurnal</button>
+  <button data-tab="students">👥 O'quvchilar</button>
+  <button data-tab="topics">📚 Mavzular</button>
+  <button data-tab="report">📊 Hisobot</button>
+  <button data-tab="settings">⚙️ Sozlamalar</button>
+</nav>
+
+<main>
+  <!-- JURNAL -->
+  <section id="tab-journal">
+    <div class="card noprint">
+      <div class="row">
+        <button class="btn primary" id="addLessonBtn">+ Yangi dars (mavzu bilan)</button>
+        <button class="btn" onclick="window.print()">🖨 Chop etish</button>
+        <span class="muted" id="journalInfo"></span>
+      </div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--green-bg)"></i>✓ Keldi</span>
+        <span><i class="sw" style="background:var(--red)"></i>✗ Kelmadi</span>
+        <span><i class="sw" style="background:var(--yellow-bg)"></i>S Sababli</span>
+        <span><i class="sw" style="background:var(--red-bg)"></i>Qizil qator — darslarning 50% yoki ko'pini qoldirgan</span>
+        <span>Tugmani bosib holatni almashtiring</span>
+      </div>
+    </div>
+    <div id="journalAlert"></div>
+    <div id="journalTable"></div>
+  </section>
+
+  <!-- O'QUVCHILAR -->
+  <section id="tab-students" class="hidden">
+    <div class="card">
+      <h2>O'quvchi qo'shish</h2>
+      <form class="row" id="studentForm">
+        <input id="stLast" placeholder="Familiya" required>
+        <input id="stFirst" placeholder="Ism" required>
+        <input id="stPhone" placeholder="Telefon (ixtiyoriy)">
+        <button class="btn primary" type="submit">Qo'shish</button>
+      </form>
+      <details style="margin-top:12px">
+        <summary class="muted" style="cursor:pointer">Ko'p o'quvchini birdan qo'shish</summary>
+        <p class="muted" style="font-size:13px">Har bir qatorga: <b>Familiya Ism</b></p>
+        <textarea id="bulkStudents" rows="5" style="width:100%" placeholder="Aliyev Vali&#10;Karimova Madina"></textarea>
+        <button class="btn" id="bulkAddBtn" style="margin-top:8px">Hammasini qo'shish</button>
+      </details>
+    </div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:8px">
+        <h2 style="margin:0">O'quvchilar ro'yxati</h2>
+        <input id="stSearch" placeholder="🔍 Qidirish...">
+      </div>
+      <ul class="list" id="studentList"></ul>
+    </div>
+  </section>
+
+  <!-- MAVZULAR -->
+  <section id="tab-topics" class="hidden">
+    <div class="card">
+      <h2>Dars va mavzu qo'shish</h2>
+      <form id="lessonForm">
+        <div class="row">
+          <input type="date" id="lsDate" required>
+          <input id="lsTopic" placeholder="Mavzu nomi" required style="flex:1;min-width:220px">
+        </div>
+        <textarea id="lsNote" rows="2" placeholder="Izoh / uyga vazifa (ixtiyoriy)" style="width:100%;margin-top:8px"></textarea>
+        <button class="btn primary" type="submit" style="margin-top:8px">Saqlash</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Mavzular ro'yxati</h2>
+      <ul class="list" id="topicList"></ul>
+    </div>
+  </section>
+
+  <!-- HISOBOT -->
+  <section id="tab-report" class="hidden">
+    <div class="stats" id="stats"></div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:10px">
+        <h2 style="margin:0">O'quvchilar bo'yicha hisobot</h2>
+        <button class="btn noprint" onclick="window.print()">🖨 Chop etish</button>
+      </div>
+      <div id="reportTable"></div>
+    </div>
+  </section>
+
+  <!-- SOZLAMALAR -->
+  <section id="tab-settings" class="hidden">
+    <div class="card">
+      <h2>Ma'lumotlar zaxirasi</h2>
+      <p class="muted">Barcha ma'lumotlar shu kompyuterdagi brauzerda saqlanadi (internet kerak emas). Ehtiyot uchun vaqti-vaqti bilan zaxira fayl yuklab oling.</p>
+      <div class="row">
+        <button class="btn primary" id="exportBtn">⬇ Zaxira faylni yuklab olish (JSON)</button>
+        <label class="btn">⬆ Zaxiradan tiklash <input type="file" id="importFile" accept=".json" class="hidden"></label>
+        <button class="btn" id="csvBtn">⬇ Excel uchun (CSV)</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Chegara</h2>
+      <div class="row">
+        <label for="threshold">Qizilga tushish chegarasi (qoldirilgan darslar %):</label>
+        <input type="number" id="threshold" min="1" max="100" style="width:90px">
+        <label><input type="checkbox" id="excusedCounts"> Sababli darslar ham hisoblansin</label>
+      </div>
+    </div>
+    <div class="card">
+      <h2 style="color:var(--red)">Xavfli zona</h2>
+      <button class="btn danger" id="deleteGroupBtn">Joriy guruhni o'chirish</button>
+      <button class="btn danger" id="resetAllBtn">Barcha ma'lumotlarni o'chirish</button>
+    </div>
+  </section>
+</main>
+
+<!-- Dialog -->
+<dialog id="dlg">
+  <form method="dialog" id="dlgForm">
+    <h3 id="dlgTitle"></h3>
+    <div id="dlgBody"></div>
+    <div class="actions">
+      <button class="btn" value="cancel" type="button" id="dlgCancel">Bekor qilish</button>
+      <button class="btn primary" value="ok" type="submit">Saqlash</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function(){
+'use strict';
+const KEY = 'davomat_v1';
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const today = () => new Date().toISOString().slice(0,10);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate = d => { if(!d) return ''; const [y,m,dd]=d.split('-'); return `${dd}.${m}.${y}`; };
+
+// ---------- Saqlash ----------
+let db;
+function load(){
+  try { db = JSON.parse(localStorage.getItem(KEY)); } catch(e){ db = null; }
+  if(!db || !Array.isArray(db.groups)){
+    const g = {id:uid(), name:'1-guruh', students:[], lessons:[], records:{}};
+    db = {groups:[g], current:g.id, threshold:50, excusedCounts:false};
+  }
+  if(!db.groups.length){ const g={id:uid(),name:'1-guruh',students:[],lessons:[],records:{}}; db.groups.push(g); db.current=g.id; }
+  if(!db.groups.find(g=>g.id===db.current)) db.current = db.groups[0].id;
+  if(typeof db.threshold!=='number') db.threshold = 50;
+}
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(db)); }
+  catch(e){ alert("Saqlab bo'lmadi: " + e.message); }
+}
+const G = () => db.groups.find(g=>g.id===db.current);
+const rec = (g, sid, lid) => (g.records[sid] && g.records[sid][lid]) || {};
+function setRec(g, sid, lid, patch){
+  g.records[sid] = g.records[sid] || {};
+  const r = Object.assign({}, g.records[sid][lid] || {}, patch);
+  if(!r.s) delete r.s;
+  if(!r.g) delete r.g;
+  if(Object.keys(r).length) g.records[sid][lid] = r; else delete g.records[sid][lid];
+  save();
+}
+const sortedLessons = g => [...g.lessons].sort((a,b)=> a.date.localeCompare(b.date) || a.created - b.created);
+const sortedStudents = g => [...g.students].sort((a,b)=> (a.last+a.first).localeCompare(b.last+b.first,'uz'));
+
+// ---------- Statistika ----------
+function studentStats(g, s){
+  const lessons = g.lessons;
+  let present=0, absent=0, excused=0, marked=0, sum=0, cnt=0;
+  for(const l of lessons){
+    const r = rec(g, s.id, l.id);
+    if(r.s==='p') present++;
+    else if(r.s==='a') absent++;
+    else if(r.s==='e') excused++;
+    if(r.s) marked++;
+    if(r.g){ sum += Number(r.g); cnt++; }
+  }
+  const total = lessons.length;
+  const missed = absent + (db.excusedCounts ? excused : 0);
+  const missPct = total ? Math.round(missed/total*100) : 0;
+  const danger = total>0 && missPct >= db.threshold;
+  return {total, present, absent, excused, marked, missed, missPct, danger, avg: cnt ? (sum/cnt) : null};
+}
+const avgClass = a => a==null ? '' : a>=4.5 ? 'green' : a>=3.5 ? 'yellow' : 'red';
+
+// ---------- Guruhlar ----------
+function renderGroups(){
+  const sel = document.getElementById('groupSelect');
+  sel.innerHTML = db.groups.map(g=>`<option value="${g.id}" ${g.id===db.current?'selected':''}>${esc(g.name)}</option>`).join('');
+}
+document.getElementById('groupSelect').onchange = e => { db.current = e.target.value; save(); renderAll(); };
+document.getElementById('addGroupBtn').onclick = () => {
+  openDialog("Yangi guruh", `<label>Guruh nomi</label><input name="name" required placeholder="Masalan: Ingliz tili A1">`, f => {
+    const g = {id:uid(), name:f.name.trim(), students:[], lessons:[], records:{}};
+    db.groups.push(g); db.current = g.id; save(); renderAll();
+  });
+};
+document.getElementById('editGroupBtn').onclick = () => {
+  const g = G();
+  openDialog("Guruh nomini o'zgartirish", `<label>Guruh nomi</label><input name="name" required value="${esc(g.name)}">`, f => {
+    g.name = f.name.trim(); save(); renderAll();
+  });
+};
+
+// ---------- Jurnal ----------
+function renderJournal(){
+  const g = G();
+  const lessons = sortedLessons(g), students = sortedStudents(g);
+  document.getElementById('journalInfo').textContent = `${students.length} o'quvchi · ${lessons.length} dars`;
+  const wrap = document.getElementById('journalTable');
+  const alertBox = document.getElementById('journalAlert');
+  if(!students.length){
+    alertBox.innerHTML='';
+    wrap.innerHTML = `<div class="card empty">Hali o'quvchi yo'q. <br><br><button class="btn primary" data-go="students">O'quvchi qo'shish</button></div>`;
+    return;
+  }
+  const dangerList = students.filter(s=>studentStats(g,s).danger);
+  alertBox.innerHTML = dangerList.length
+    ? `<div class="alert">⚠ ${dangerList.length} ta o'quvchi darslarning ${db.threshold}% yoki ko'pini qoldirgan: ${dangerList.map(s=>esc(s.last+' '+s.first)).join(', ')}</div>` : '';
+
+  let h = `<div class="tablewrap"><table><thead><tr><th>№</th><th class="name">Familiya Ism</th>`;
+  for(const l of lessons){
+    h += `<th><div class="lesson-head" title="${esc(l.topic)}">${fmtDate(l.date)}<span class="topic">${esc(l.topic)}</span>
+      <button class="btn sm noprint" data-act="editLesson" data-id="${l.id}" style="margin-top:4px">✎</button>
+      <button class="btn sm noprint" data-act="allPresent" data-id="${l.id}" title="Hammasi keldi" style="margin-top:4px">✓ hamma</button></div></th>`;
+  }
+  h += `<th>Qoldirgan</th><th>Davomat</th><th>O'rtacha baho</th></tr></thead><tbody>`;
+  students.forEach((s,i)=>{
+    const st = studentStats(g,s);
+    h += `<tr class="${st.danger?'danger':''}" data-sid="${s.id}"><td>${i+1}</td><td class="name">${esc(s.last)} ${esc(s.first)}</td>`;
+    for(const l of lessons){
+      const r = rec(g,s.id,l.id);
+      const lbl = r.s==='p'?'✓':r.s==='a'?'✗':r.s==='e'?'S':'–';
+      h += `<td><div class="cell">
+        <button class="att ${r.s||''}" data-act="att" data-sid="${s.id}" data-lid="${l.id}" title="Bosib almashtiring">${lbl}</button>
+        <select class="grade" data-act="grade" data-sid="${s.id}" data-lid="${l.id}">
+          <option value="">baho</option>${[5,4,3,2,1].map(v=>`<option ${String(r.g)===String(v)?'selected':''}>${v}</option>`).join('')}
+        </select></div></td>`;
+    }
+    h += `<td><span class="pill ${st.danger?'red':st.missPct>0?'yellow':'green'}">${st.missed}/${st.total} (${st.missPct}%)</span></td>
+      <td>${st.total? (100-st.missPct)+'%' : '–'}</td>
+      <td>${st.avg!=null?`<span class="pill ${avgClass(st.avg)}">${st.avg.toFixed(1)}</span>`:'–'}</td></tr>`;
+  });
+  h += `</tbody></table></div>`;
+  if(!lessons.length) h += `<div class="card empty">Hali dars yo'q. Yuqoridagi "+ Yangi dars" tugmasini bosing.</div>`;
+  wrap.innerHTML = h;
+}
+
+const cycle = {'':'p', p:'a', a:'e', e:''};
+document.getElementById('journalTable').addEventListener('click', e=>{
+  const b = e.target.closest('[data-act]'); if(!b) return;
+  const g = G();
+  if(b.dataset.act==='att'){
+    const r = rec(g,b.dataset.sid,b.dataset.lid);
+    setRec(g,b.dataset.sid,b.dataset.lid,{s:cycle[r.s||'']});
+    renderJournal();
+  } else if(b.dataset.act==='editLesson'){
+    editLesson(b.dataset.id);
+  } else if(b.dataset.act==='allPresent'){
+    for(const s of g.students){ const r=rec(g,s.id,b.dataset.id); if(!r.s) setRec(g,s.id,b.dataset.id,{s:'p'}); }
+    renderJournal();
+  }
+});
+document.getElementById('journalTable').addEventListener('change', e=>{
+  const t = e.target; if(t.dataset.act!=='grade') return;
+  const g = G();
+  const patch = {g: t.value};
+  if(t.value && !rec(g,t.dataset.sid,t.dataset.lid).s) patch.s = 'p'; // baho qo'yilsa — keldi
+  setRec(g,t.dataset.sid,t.dataset.lid,patch);
+  renderJournal();
+});
+document.getElementById('addLessonBtn').onclick = () => lessonDialog();
+
+function lessonDialog(lesson){
+  const l = lesson || {date:today(), topic:'', note:''};
+  openDialog(lesson ? "Darsni tahrirlash" : "Yangi dars",
+    `<label>Sana</label><input type="date" name="date" required value="${esc(l.date)}">
+     <label>Mavzu</label><input name="topic" required value="${esc(l.topic)}" placeholder="Dars mavzusi">
+     <label>Izoh / uyga vazifa</label><textarea name="note" rows="3">${esc(l.note||'')}</textarea>
+     ${lesson?`<button type="button" class="btn danger" id="delLessonBtn" style="margin-top:12px">Darsni o'chirish</button>`:''}`,
+    f => {
+      const g = G();
+      if(lesson){ Object.assign(lesson,{date:f.date, topic:f.topic.trim(), note:f.note.trim()}); }
+      else g.lessons.push({id:uid(), date:f.date, topic:f.topic.trim(), note:f.note.trim(), created:Date.now()});
+      save(); renderAll();
+    });
+  if(lesson) document.getElementById('delLessonBtn').onclick = () => { deleteLesson(lesson.id); };
+}
+function editLesson(id){ lessonDialog(G().lessons.find(l=>l.id===id)); }
+function deleteLesson(id){
+  if(!confirm("Dars va unga tegishli davomat/baholar o'chirilsinmi?")) return;
+  const g = G();
+  g.lessons = g.lessons.filter(l=>l.id!==id);
+  for(const sid in g.records) delete g.records[sid][id];
+  save(); closeDialog(); renderAll();
+}
+
+// ---------- O'quvchilar ----------
+function renderStudents(){
+  const g = G();
+  const q = document.getElementById('stSearch').value.trim().toLowerCase();
+  const list = sortedStudents(g).filter(s => (s.last+' '+s.first).toLowerCase().includes(q));
+  const ul = document.getElementById('studentList');
+  if(!list.length){ ul.innerHTML = `<li class="empty" style="justify-content:center">O'quvchi topilmadi</li>`; return; }
+  ul.innerHTML = list.map((s,i)=>{
+    const st = studentStats(g,s);
+    return `<li><div><b>${i+1}. ${esc(s.last)} ${esc(s.first)}</b> ${s.phone?`<span class="muted">· ${esc(s.phone)}</span>`:''}
+      ${st.danger?' <span class="pill red">Qizil zona</span>':''}</div>
+      <div class="row"><button class="btn sm" data-edit="${s.id}">Tahrirlash</button><button class="btn sm danger" data-del="${s.id}">O'chirish</button></div></li>`;
+  }).join('');
+}
+document.getElementById('stSearch').oninput = renderStudents;
+document.getElementById('studentForm').onsubmit = e => {
+  e.preventDefault();
+  const last = document.getElementById('stLast'), first = document.getElementById('stFirst'), phone = document.getElementById('stPhone');
+  G().students.push({id:uid(), last:last.value.trim(), first:first.value.trim(), phone:phone.value.trim()});
+  save(); last.value=first.value=phone.value=''; last.focus(); renderAll();
+};
+document.getElementById('bulkAddBtn').onclick = () => {
+  const ta = document.getElementById('bulkStudents');
+  const lines = ta.value.split('\n').map(x=>x.trim()).filter(Boolean);
+  for(const line of lines){
+    const parts = line.split(/\s+/);
+    G().students.push({id:uid(), last:parts[0], first:parts.slice(1).join(' '), phone:''});
+  }
+  save(); ta.value=''; renderAll();
+  if(lines.length) alert(lines.length + " ta o'quvchi qo'shildi");
+};
+document.getElementById('studentList').onclick = e => {
+  const g = G();
+  if(e.target.dataset.del){
+    const s = g.students.find(x=>x.id===e.target.dataset.del);
+    if(!confirm(`${s.last} ${s.first} o'chirilsinmi? Uning davomati va baholari ham o'chadi.`)) return;
+    g.students = g.students.filter(x=>x.id!==s.id); delete g.records[s.id]; save(); renderAll();
+  }
+  if(e.target.dataset.edit){
+    const s = g.students.find(x=>x.id===e.target.dataset.edit);
+    openDialog("O'quvchini tahrirlash",
+      `<label>Familiya</label><input name="last" required value="${esc(s.last)}">
+       <label>Ism</label><input name="first" required value="${esc(s.first)}">
+       <label>Telefon</label><input name="phone" value="${esc(s.phone||'')}">`,
+      f => { s.last=f.last.trim(); s.first=f.first.trim(); s.phone=f.phone.trim(); save(); renderAll(); });
+  }
+};
+
+// ---------- Mavzular ----------
+function renderTopics(){
+  const g = G();
+  const lessons = sortedLessons(g);
+  const ul = document.getElementById('topicList');
+  if(!lessons.length){ ul.innerHTML = `<li class="empty" style="justify-content:center">Hali mavzu kiritilmagan</li>`; return; }
+  ul.innerHTML = lessons.map((l,i)=>{
+    let p=0,a=0;
+    for(const s of g.students){ const r=rec(g,s.id,l.id); if(r.s==='p')p++; else if(r.s==='a')a++; }
+    return `<li><div style="flex:1;min-width:220px"><b>${i+1}-dars · ${fmtDate(l.date)}</b> — ${esc(l.topic)}
+      ${l.note?`<div class="muted topic-text" style="font-size:13px;margin-top:4px">${esc(l.note)}</div>`:''}
+      <div class="muted" style="font-size:13px;margin-top:4px">Keldi: ${p} · Kelmadi: ${a}</div></div>
+      <div class="row"><button class="btn sm" data-edit="${l.id}">Tahrirlash</button><button class="btn sm danger" data-del="${l.id}">O'chirish</button></div></li>`;
+  }).join('');
+}
+document.getElementById('topicList').onclick = e => {
+  if(e.target.dataset.edit) editLesson(e.target.dataset.edit);
+  if(e.target.dataset.del) deleteLesson(e.target.dataset.del);
+};
+document.getElementById('lessonForm').onsubmit = e => {
+  e.preventDefault();
+  const d=document.getElementById('lsDate'), t=document.getElementById('lsTopic'), n=document.getElementById('lsNote');
+  G().lessons.push({id:uid(), date:d.value, topic:t.value.trim(), note:n.value.trim(), created:Date.now()});
+  save(); t.value=''; n.value=''; renderAll();
+};
+
+// ---------- Hisobot ----------
+function renderReport(){
+  const g = G();
+  const students = sortedStudents(g);
+  const all = students.map(s=>({s, st:studentStats(g,s)}));
+  const danger = all.filter(x=>x.st.danger).length;
+  const avgs = all.map(x=>x.st.avg).filter(x=>x!=null);
+  const totalSlots = all.reduce((t,x)=>t+x.st.total,0);
+  const totalMissed = all.reduce((t,x)=>t+x.st.missed,0);
+  const attPct = totalSlots ? Math.round((1-totalMissed/totalSlots)*100) : 0;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="v">${students.length}</div><div class="l">O'quvchilar</div></div>
+    <div class="stat"><div class="v">${g.lessons.length}</div><div class="l">O'tilgan darslar</div></div>
+    <div class="stat"><div class="v">${totalSlots?attPct+'%':'–'}</div><div class="l">Umumiy davomat</div></div>
+    <div class="stat"><div class="v">${avgs.length?(avgs.reduce((a,b)=>a+b,0)/avgs.length).toFixed(2):'–'}</div><div class="l">Guruh o'rtacha bahosi</div></div>
+    <div class="stat red"><div class="v">${danger}</div><div class="l">Qizil zonada (≥${db.threshold}%)</div></div>`;
+  if(!students.length){ document.getElementById('reportTable').innerHTML = `<div class="empty">Ma'lumot yo'q</div>`; return; }
+  all.sort((a,b)=> b.st.missPct - a.st.missPct);
+  let h = `<div class="tablewrap"><table><thead><tr><th>№</th><th class="name">Familiya Ism</th><th>Darslar</th><th>Keldi</th><th>Kelmadi</th><th>Sababli</th><th>Qoldirgan %</th><th>O'rtacha baho</th><th>Holat</th></tr></thead><tbody>`;
+  all.forEach(({s,st},i)=>{
+    h += `<tr class="${st.danger?'danger':''}"><td>${i+1}</td><td class="name">${esc(s.last)} ${esc(s.first)}</td>
+      <td>${st.total}</td><td>${st.present}</td><td>${st.absent}</td><td>${st.excused}</td>
+      <td><span class="pill ${st.danger?'red':st.missPct>0?'yellow':'green'}">${st.missPct}%</span></td>
+      <td>${st.avg!=null?st.avg.toFixed(2):'–'}</td>
+      <td>${st.danger?'<span class="pill red">Qizil zona</span>':'<span class="pill green">Yaxshi</span>'}</td></tr>`;
+  });
+  document.getElementById('reportTable').innerHTML = h + `</tbody></table></div>`;
+}
+
+// ---------- Sozlamalar ----------
+const thr = document.getElementById('threshold'), exc = document.getElementById('excusedCounts');
+thr.onchange = () => { const v = Math.min(100, Math.max(1, parseInt(thr.value)||50)); db.threshold=v; thr.value=v; save(); renderAll(); };
+exc.onchange = () => { db.excusedCounts = exc.checked; save(); renderAll(); };
+function download(name, text, type){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text],{type}));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+}
+document.getElementById('exportBtn').onclick = () => download(`davomat-zaxira-${today()}.json`, JSON.stringify(db,null,2), 'application/json');
+document.getElementById('importFile').onchange = e => {
+  const file = e.target.files[0]; if(!file) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try{
+      const d = JSON.parse(rd.result);
+      if(!d || !Array.isArray(d.groups)) throw new Error("Noto'g'ri fayl");
+      if(!confirm("Joriy ma'lumotlar zaxiradagi bilan almashtirilsinmi?")) return;
+      db = d; save(); load(); renderAll(); alert("Ma'lumotlar tiklandi");
+    }catch(err){ alert("Xato: " + err.message); }
+    e.target.value='';
+  };
+  rd.readAsText(file);
+};
+document.getElementById('csvBtn').onclick = () => {
+  const g = G(), lessons = sortedLessons(g);
+  const q = v => `"${String(v??'').replace(/"/g,'""')}"`;
+  const rows = [['Familiya','Ism',...lessons.map(l=>fmtDate(l.date)+' '+l.topic),'Qoldirgan %',"O'rtacha baho"].map(q).join(';')];
+  for(const s of sortedStudents(g)){
+    const st = studentStats(g,s);
+    rows.push([s.last,s.first,...lessons.map(l=>{const r=rec(g,s.id,l.id); const a=r.s==='p'?'+':r.s==='a'?'NB':r.s==='e'?'S':''; return a+(r.g?' '+r.g:'');}), st.missPct+'%', st.avg!=null?st.avg.toFixed(2):''].map(q).join(';'));
+  }
+  download(`${g.name}-${today()}.csv`, '﻿'+rows.join('\r\n'), 'text/csv;charset=utf-8');
+};
+document.getElementById('deleteGroupBtn').onclick = () => {
+  const g = G();
+  if(!confirm(`"${g.name}" guruhi va undagi barcha ma'lumotlar o'chirilsinmi?`)) return;
+  db.groups = db.groups.filter(x=>x.id!==g.id); save(); load(); save(); renderAll();
+};
+document.getElementById('resetAllBtn').onclick = () => {
+  if(!confirm("BARCHA ma'lumotlar o'chiriladi. Davom etasizmi?")) return;
+  localStorage.removeItem(KEY); load(); save(); renderAll();
+};
+
+// ---------- Dialog ----------
+const dlg = document.getElementById('dlg');
+let dlgCb = null;
+function openDialog(title, body, cb){
+  document.getElementById('dlgTitle').textContent = title;
+  document.getElementById('dlgBody').innerHTML = body;
+  dlgCb = cb; dlg.showModal();
+  const first = dlg.querySelector('input,textarea'); if(first) first.focus();
+}
+function closeDialog(){ if(dlg.open) dlg.close(); dlgCb=null; }
+document.getElementById('dlgCancel').onclick = closeDialog;
+document.getElementById('dlgForm').onsubmit = e => {
+  e.preventDefault();
+  const f = Object.fromEntries(new FormData(e.target).entries());
+  const cb = dlgCb; closeDialog(); if(cb) cb(f);
+};
+
+// ---------- Tablar ----------
+function showTab(name){
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  document.querySelectorAll('main > section').forEach(s=>s.classList.toggle('hidden', s.id!=='tab-'+name));
+  try{ sessionStorage.setItem('davomat_tab', name); }catch(e){}
+}
+document.querySelector('nav').onclick = e => { const b=e.target.closest('button'); if(b){ renderAll(); showTab(b.dataset.tab); } };
+document.body.addEventListener('click', e => { const b=e.target.closest('[data-go]'); if(b) showTab(b.dataset.go); });
+
+function renderAll(){
+  renderGroups(); renderJournal(); renderStudents(); renderTopics(); renderReport();
+  thr.value = db.threshold; exc.checked = !!db.excusedCounts;
+}
+
+load();
+document.getElementById('lsDate').value = today();
+renderAll();
+try{ const t=sessionStorage.getItem('davomat_tab'); if(t) showTab(t); }catch(e){}
+})();
+</script>
+</body>
+</html>
